@@ -421,7 +421,7 @@ premise_three <- function(argument) {
       
       # simulating random plot 
       x1 <- runif(150, min = 5, max = 18)
-      y1 <- .2*x1 + rnorm(150, 1.3, sd = .27) - .5
+      y1 <- .2*x1 + rnorm(150, 1.3, sd = .27) - 1.5
       sim <- tibble(x = x1, y = y1)
       p2 <- ggplot(sim, aes(x1, y1)) +
             labs(title = "Simulated FEV1 increases with Age",
@@ -438,8 +438,6 @@ premise_three <- function(argument) {
 }
 
 premise_three(dataset)
-
-
 
 
 ```
