@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 title: "Homework 2 Report"
 output: html_document
@@ -227,3 +228,234 @@ Create a fault tree for the alternative outcome describing how the alternative o
 Your fault tree should be created as a separate image and does not need to be created in R. Upload the image of the fault tree to Canvas.
 
 
+=======
+---
+title: "Homework 2 Report"
+output: html_document
+---
+
+
+## Name
+
+Agatha Angeles
+
+### Setup
+
+Read in the data with `read_csv()` and store the data as an R object named `dataset`. Check the data to make sure all of the expected observations and variables are there.
+
+
+```{r}
+## Load the data and any necessary packages here.
+
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+
+dataset <- read_csv("maacs.csv.gz")
+
+
+```
+
+## Part 1
+
+We will first consider the relationship between FEV1 and age. In general, it is expected that as children get older (and hence, larger in size), their FEV1 values should get higher. 
+
+Consider the statement "FEV1 values in children are higher in older children relative to younger children". 
+
+Write a function in R that takes the `dataset` object as an argument and returns `TRUE` if the statement above is true for the dataset and `FALSE` otherwise. 
+
+NOTE: In order to write this function, you will need to translate the statement above into something that can be checked with the data. There are many ways in which you can do that translation correctly and you only need to pick one way here. 
+
+NOTE: For this part, do not use any plots.
+
+```{r}
+## Write your function here
+
+# cor test, ignore NAs
+
+relationship <- function(argument) {
+      corr = cor(dataset$age, dataset$fev1, use = "complete.obs")
+      if(corr > -1){
+        print(TRUE)
+      }
+      else{
+        print(FALSE)
+      }
+}
+
+relationship(dataset)
+
+```
+
+
+## Part 2
+
+Fit a linear regression model with FEV1 as the outcome and age as a predictor.
+
+How much does FEV1 change for a 1-year increase in the child's age? 
+
+```{r}
+## Add your code here
+lm_coef <- lm(dataset$fev1 ~ dataset$age)
+slope <- round(coef(lm_coef)["dataset$age"], 2)
+
+```
+
+
+Write your data analysis statement interpreting the regression model here:
+For subjects whose age happens to differ by one year, the expected difference in
+FEV1 is .17/liters.
+
+
+## Part 3
+
+Develop **three** supporting premises derived from the data that support the statement you wrote in Part 2. These can be plots, other summary statistics, or model results. 
+
+NOTE: 
+
+* At least one supporting premise should use a plot.
+
+* Do not use the code you write in Part 1 as a supporting premise
+
+```{r}
+## Add your code here
+
+# correlation coeff.
+cor(dataset$age, dataset$fev1, use = "complete.obs")
+
+# aggregate means
+mean_table <- aggregate(fev1 ~ age, data = dataset, mean)
+mean_table$fev1[which.min(mean_table$age)] 
+mean_table$fev1[which.max(mean_table$age)]
+
+# Plotting
+ggplot(dataset, aes(x = age, y = fev1)) +
+    geom_point() +
+    labs(title = "FEV1 increases with Age",
+              x = "Age (years)",
+              y = "FEV1") +                               
+    geom_smooth(method = "lm",                   
+              se = TRUE,                       
+              color = "red",                  
+              fill = "grey")
+
+lm_coef <- lm(dataset$fev1 ~ dataset$age)
+slope <- round(coef(lm_coef)["dataset$age"], 2)
+
+
+```
+
+
+Write the three supporting premise statements here:
+
+1. There is a slope of the data has an upward trend, with a slope of about .17.
+
+2. The mean of the FEV1 for older children is higher than the FEV1 for younger children. 
+
+3. The correlation coefficient indicates that their is a strong positive relationship between FEV1 in children, as a child's age increases so does FEV1.
+
+
+## Part 4
+
+For each of the supporting premises above, write a function that takes the `dataset` object as an argument and returns `TRUE` if the supporting premise statement above is true for the dataset and `FALSE` otherwise. 
+
+For statements involving plots, instead of returning `TRUE` or `FALSE`, you function should do two things:
+
+1. Produce the plot that is used in the statement
+
+2. Produce a hypothetical version of the plot in the event that the statement is true. This can be done using simulated data or by simply hand drawing a plot.
+
+
+```{r}
+## Function for supporting premise statement 1
+premise_one <- function(argument) {
+      corr = cor(dataset$age, dataset$fev1, use = "complete.obs")
+      if(corr > -1){
+        print(TRUE)
+      }
+      else{
+        print(FALSE)
+      }
+}
+
+```
+
+
+```{r}
+## Function for supporting premise statement 2
+premise_two <- function(argument) {
+      mean_table <- aggregate(fev1 ~ age, data = dataset, mean)
+      if(mean_table$fev1[which.min(mean_table$age)] < mean_table$fev1[which.max(mean_table$age)]){
+        print(TRUE)
+      }
+      else{
+        print(FALSE)
+      }
+}
+```
+
+
+```{r}
+## Function for supporting premise statement 3
+
+premise_three <- function(argument) {
+      set.seed(80)
+      lm_coef <- lm(dataset$fev1 ~ dataset$age)
+      slope <- round(coef(lm_coef)["dataset$age"], 2)
+      if(slope > -1){
+        print(TRUE)
+      }
+      else{
+        print(FALSE)
+      }
+      p1 <- ggplot(dataset, aes(x = age, y = fev1)) +
+            geom_point() +
+            labs(title = "FEV1 increases with Age",
+              x = "Age (years)",
+              y = "FEV1") +                               
+            geom_smooth(method = "lm",                   
+                    se = TRUE,                       
+                    color = "red",                  
+                    fill = "grey",                  
+                    alpha = 0.3)
+      
+      # simulating random plot 
+      x1 <- runif(150, min = 5, max = 18)
+      y1 <- .2*x1 + rnorm(150, 1.3, sd = .27) - .5
+      sim <- tibble(x = x1, y = y1)
+      p2 <- ggplot(sim, aes(x1, y1)) +
+            labs(title = "Simulated FEV1 increases with Age",
+              x = "Age (years)",
+              y = "FEV1") +
+            geom_point() +
+            geom_smooth(method = "lm",
+                        se = TRUE,                       
+                        color = "red",                  
+                        fill = "grey",                   
+                        alpha = 0.3)
+      print(p1)
+      print(p2)
+}
+
+premise_three(dataset)
+
+
+
+
+```
+
+Execute each of your function and show that the produce the expected output.
+
+
+
+
+## Part 5
+
+Describe one alternative to the primary statement "FEV1 values in children are higher in older children relative to younger children". 
+
+Create a fault tree for the alternative outcome describing how the alternative outcome could be realized in the data even if the primary statement were true.
+
+Your fault tree should be created as a separate image and does not need to be created in R. Upload the image of the fault tree to Canvas.
+
+
+>>>>>>> 07c2b23 (Work please!)
